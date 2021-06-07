@@ -21,10 +21,7 @@ public class Montgomery {
         modulusInv = modulus.modInverse(R).negate();
     }
 
-
-    public BigInteger multiply(BigInteger a, BigInteger b) {
-        BigInteger a_ = a.shiftLeft(RBits).mod(modulus);
-        BigInteger b_ = b.shiftLeft(RBits).mod(modulus);
+    public BigInteger MonPro(BigInteger a_, BigInteger b_) {
         BigInteger t = a_.multiply(b_);
         BigInteger u = t.add((t.multiply(modulusInv).mod(R)).multiply(modulus));
         u = u.shiftRight(RBits);
@@ -34,17 +31,24 @@ public class Montgomery {
     }
 
 
+    public BigInteger multiply(BigInteger a, BigInteger b) {
+        BigInteger a_ = a.shiftLeft(RBits).mod(modulus);
+        BigInteger b_ = b.shiftLeft(RBits).mod(modulus);
+        return MonPro(a_,b_).multiply(RInv).mod(modulus);
+    }
+
+
     public BigInteger pow(BigInteger a, BigInteger e) {
         BigInteger a_ = a.shiftLeft(RBits).mod(modulus);
         BigInteger x_ = BigInteger.ONE.shiftLeft(RBits).mod(modulus);
         String bitE = e.toString(2);
         for (int i = 0; i < e.bitLength(); i++) {
-            x_ = multiply(x_, x_);
+            x_ = MonPro(x_, x_);
             if(bitE.charAt(i) == '1'){
-                x_ = multiply(x_,a_);
+                x_ =  MonPro(x_,a_);
             }
 
         }
-        return multiply(x_, BigInteger.ONE);
+        return MonPro(x_, BigInteger.ONE);
     }
 }
